@@ -1,55 +1,76 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:student_management/getx/student_cotroller.dart';
+import 'package:student_management/screens/edit_student_screen.dart';
+import 'package:student_management/screens/profile_screen.dart';
 
 class StudentDetailscreen extends StatelessWidget {
-   StudentDetailscreen({super.key});
+  final StudentController studentController = Get.find<StudentController>();
 
-  final List<Map<String, String>> students = [
-    {
-      'name': 'John Doe',
-      'school': 'Greenfield High',
-      'profilePicturePath': 'assets/logo.png',
-    },
-    {
-      'name': 'Jane Smith',
-      'school': 'Sunrise Academy',
-      'profilePicturePath': 'assets/logo.png',
-    },
-    {
-      'name': 'Michael Johnson',
-      'school': 'Blue River School',
-      'profilePicturePath': 'assets/logo.png',
-    },
-  ];
+  StudentDetailscreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Details'),
+        backgroundColor: const Color(0xFF2C2E3A),
+        title: const Text(
+          'STUDENT LIST',
+          style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: ListView.builder(
-            itemCount: students.length, // number of students in the list
-            itemBuilder: (context, index) {
-              final student = students[index];
-              return Card(
-                elevation: 3,
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage(student['profilePicturePath']!),
+          child: Obx(
+            () => ListView.builder(
+              itemCount: studentController.students.length,
+              itemBuilder: (context, index) {
+                var student = studentController.students[index];
+                return Card(
+                  child: ListTile(
+                    onTap: () {
+                      Get.to(ProfileScreen(index: index));
+                    },
+                    leading: CircleAvatar(
+                      backgroundImage:
+                          FileImage(File(student.profilePicturePath)),
+                    ),
+                    title: Text(student.name),
+                    subtitle: Text('School: ${student.schoolname}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            Get.to(EditStudentScreen(index: index));
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            Get.defaultDialog(
+                              title: 'Delete Student',
+                              middleText:
+                                  'Are you sure you want to delete ${student.name}?',
+                              confirmTextColor: Colors.white,
+                              onConfirm: () {
+                                studentController.deleteStudent(student.id);
+                                Get.back();
+                              },
+                              onCancel: () {},
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  title: Text(student['name']!),
-                  subtitle: Text(student['school']!),
-                  onTap: () {
-                    
-                  },
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

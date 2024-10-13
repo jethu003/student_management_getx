@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:student_management/getx/student_cotroller.dart';
 
-import 'package:student_management/screens/home_screen.dart';
+import 'package:student_management/screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(StudentController());
 
   runApp(const MyApp());
 }
@@ -13,14 +16,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'students app',
       theme: ThemeData(
         primaryColor: const Color(0xFF141619),
         scaffoldBackgroundColor: const Color(0xFF141619),
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

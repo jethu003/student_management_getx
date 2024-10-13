@@ -1,9 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:student_management/screens/student_detailscreen.dart';
+import 'package:get/get.dart';
+import 'package:student_management/data_base_model/student_model.dart';
+import 'package:student_management/getx/student_cotroller.dart';
+import 'student_detailscreen.dart';  // Ensure this screen is linked to show student details
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,9 +20,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String classLabel = 'Enter class';
   String fatherNameLabel = 'Enter father\'s name';
   String schoolNameLabel = 'Enter school name';
-
   final ImagePicker _picker = ImagePicker();
   File? _imageFile;
+
+  final StudentController studentController = Get.put(StudentController());
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
@@ -42,6 +45,17 @@ class _HomeScreenState extends State<HomeScreen> {
         const SnackBar(content: Text("Permission denied")),
       );
     }
+  }
+
+  void resetFields() {
+    setState(() {
+      nameController.clear();
+      ageController.clear();
+      classController.clear();
+      fatherNameController.clear();
+      schoolNameController.clear();
+      _imageFile = null;
+    });
   }
 
   @override
@@ -80,11 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 3),
-                  // Image.asset(
-                  //   'assets/logo.png',
-                  //   height: 120,
-                  //   width: 120,
-                  // ),
                   const SizedBox(height: 40),
                   Container(
                     height: 100,
@@ -118,11 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 30),
                         TextFormField(
                           controller: nameController,
-                          onChanged: (value) {
-                            setState(() {
-                              nameLabel = value.isEmpty ? 'Enter name' : '';
-                            });
-                          },
                           decoration: InputDecoration(
                             labelText: nameLabel,
                             fillColor: const Color(0xFFB3B48D),
@@ -132,11 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: ageController,
-                          onChanged: (value) {
-                            setState(() {
-                              ageLabel = value.isEmpty ? 'Enter age' : '';
-                            });
-                          },
+                          keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: ageLabel,
                             fillColor: const Color(0xFFB3B48D),
@@ -146,11 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: classController,
-                          onChanged: (value) {
-                            setState(() {
-                              classLabel = value.isEmpty ? 'Enter class' : '';
-                            });
-                          },
                           decoration: InputDecoration(
                             labelText: classLabel,
                             fillColor: const Color(0xFFB3B48D),
@@ -160,12 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: fatherNameController,
-                          onChanged: (value) {
-                            setState(() {
-                              fatherNameLabel =
-                                  value.isEmpty ? 'Enter father\'s name' : '';
-                            });
-                          },
                           decoration: InputDecoration(
                             labelText: fatherNameLabel,
                             fillColor: const Color(0xFFB3B48D),
@@ -175,12 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: schoolNameController,
-                          onChanged: (value) {
-                            setState(() {
-                              schoolNameLabel =
-                                  value.isEmpty ? 'Enter school name' : '';
-                            });
-                          },
                           decoration: InputDecoration(
                             labelText: schoolNameLabel,
                             fillColor: const Color(0xFFB3B48D),
@@ -199,8 +182,27 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           onPressed: () {
-                            // Handle save functionality
-                            print('Save pressed');
+                            try {
+                              var student = Student(
+                                id: 0,
+                                name: nameController.text,
+                                schoolname: schoolNameController.text,
+                                fathername: fatherNameController.text,
+                                age: int.parse(ageController.text),
+                                profilePicturePath: _imageFile!.path,
+                              );
+                              studentController.addStudent(student); // Add student
+                              resetFields(); // Clear fields after saving
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Student saved!')),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Error saving student'),
+                                ),
+                              );
+                            }
                           },
                           child: const Text(
                             'SAVE',
